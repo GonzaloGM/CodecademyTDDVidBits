@@ -35,59 +35,74 @@ describe('/videos', () => {
       assert.equal(foundVideo.videoUrl, videoToCreate.videoUrl);
     });
 
-    it('does not save video in database if submitting a video that lacks a title', async () => {
-      let videoToCreate = buildVideoObject();
-      videoToCreate.title = undefined;
+    describe('when the video lacks a title', () => {
+      it('does not save video in database if submitting a video that lacks a title', async () => {
+        let videoToCreate = buildVideoObject();
+        videoToCreate.title = undefined;
 
-      const response = await request(app)
-        .post('/videos')
-        .type('form')
-        .send(videoToCreate);
+        const response = await request(app)
+          .post('/videos')
+          .type('form')
+          .send(videoToCreate);
 
-      const foundVideo = await Video.findOne(videoToCreate);
-      assert.equal(foundVideo, null);
-    });
+        const foundVideo = await Video.findOne(videoToCreate);
+        assert.equal(foundVideo, null);
+      });
 
-    it('responds with a 400 status code if submitting a video that lacks a title', async () => {
-      let videoToCreate = buildVideoObject();
-      videoToCreate.title = undefined;
+      it('responds with a 400 status code if submitting a video that lacks a title', async () => {
+        let videoToCreate = buildVideoObject();
+        videoToCreate.title = undefined;
 
-      const response = await request(app)
-        .post('/videos')
-        .type('form')
-        .send(videoToCreate);
+        const response = await request(app)
+          .post('/videos')
+          .type('form')
+          .send(videoToCreate);
 
-      assert.equal(response.status, 400);
-    });
+        assert.equal(response.status, 400);
+      });
 
-    it('renders the video form if submitting a video that lacks a title', async () => {
-      let videoToCreate = buildVideoObject();
-      videoToCreate.title = undefined;
+      it('renders the video form if submitting a video that lacks a title', async () => {
+        let videoToCreate = buildVideoObject();
+        videoToCreate.title = undefined;
 
-      const response = await request(app)
-        .post('/videos')
-        .type('form')
-        .send(videoToCreate);
+        const response = await request(app)
+          .post('/videos')
+          .type('form')
+          .send(videoToCreate);
 
-      const videoInput = findElementBySelector(response.text, '#video-title');
-      const descriptionInput = findElementBySelector(response.text, '#video-description');
-      const videoUrlInput = findElementBySelector(response.text, '#video-url');
-      assert.notEqual(videoInput, null);
-      assert.notEqual(descriptionInput, null);
-      assert.notEqual(videoUrlInput, null);
-    });
+        const videoInput = findElementBySelector(response.text, '#video-title');
+        const descriptionInput = findElementBySelector(response.text, '#video-description');
+        const videoUrlInput = findElementBySelector(response.text, '#video-url');
+        assert.notEqual(videoInput, null);
+        assert.notEqual(descriptionInput, null);
+        assert.notEqual(videoUrlInput, null);
+      });
 
-    it('displays an error if submitting a video that lacks a title', async () => {
-      let videoToCreate = buildVideoObject();
-      videoToCreate.title = undefined;
+      it('displays an error if submitting a video that lacks a title', async () => {
+        let videoToCreate = buildVideoObject();
+        videoToCreate.title = undefined;
 
-      const response = await request(app)
-        .post('/videos')
-        .type('form')
-        .send(videoToCreate);
+        const response = await request(app)
+          .post('/videos')
+          .type('form')
+          .send(videoToCreate);
 
-      const errorElement = findElementBySelector(response.text, '.error-message');
-      assert.include(errorElement.innerHTML, `Path \`title\` is required`);
+        const errorElement = findElementBySelector(response.text, '.error-message');
+        assert.include(errorElement.innerHTML, `a title is required`);
+      });
+
+      it('renders the video form with the rest of the fields pre-filled if submitting a video that lacks a title', async () => {
+        let videoToCreate = buildVideoObject();
+        videoToCreate.title = undefined;
+
+        const response = await request(app)
+          .post('/videos')
+          .type('form')
+          .send(videoToCreate);
+
+        assert.equal(findElementBySelector(response.text, '#video-description').value, videoToCreate.description);
+        assert.equal(findElementBySelector(response.text, '#video-url').value, videoToCreate.videoUrl);
+      });
     });
 
     it('displays an error if submitting a video that lacks a url', async () => {
@@ -101,19 +116,6 @@ describe('/videos', () => {
 
       const errorElement = findElementBySelector(response.text, '.error-message');
       assert.include(errorElement.innerHTML, `a URL is required`);
-    });
-
-    it('renders the video form with the rest of the fields pre-filled if submitting a video that lacks a title', async () => {
-      let videoToCreate = buildVideoObject();
-      videoToCreate.title = undefined;
-
-      const response = await request(app)
-        .post('/videos')
-        .type('form')
-        .send(videoToCreate);
-
-      assert.equal(findElementBySelector(response.text, '#video-description').value, videoToCreate.description);
-      assert.equal(findElementBySelector(response.text, '#video-url').value, videoToCreate.videoUrl);
     });
 
     it('shows the video detail after submission', async () => {
